@@ -4,6 +4,7 @@
 from optparse import OptionParser
 import boto3
 import sys
+from pprint import pprint
 
 
 
@@ -21,10 +22,14 @@ def check_for_public_ip_not_set(instance):
     return instance.public_ip_address is None
 
 def _find_latest_image_id_of_kind(filters):
+    if options.verbose:
+        pprint(filters)
     matching_images = ec2.images.filter(Filters=filters)
     image_id_and_creation_date = []
     for image in matching_images:
         image_id_and_creation_date.append({image.creation_date: image.id})
+    if options.verbose:
+        pprint(image_id_and_creation_date)
     return sorted(image_id_and_creation_date)[-1].values()[0]
 
 def check_for_image_up_to_date(instance):
@@ -46,13 +51,15 @@ def check_for_image_up_to_date(instance):
 
 if __name__ == '__main__':
     parser = OptionParser()
+    parser.add_option("-p", "--profile", dest="aws_profile", default="TST", help="Use given AWS profile. Default: TST.")
     parser.add_option("-r", "--check-root-volume", action="store_true", dest="check_root_volume", default=False,
                       help="Check root volume for encryption, too. Default: False.")
     parser.add_option("-v", "--verbose", action="store_true", dest="verbose", default=False,
                       help="Be verbose. Default: False.")
     (options, args) = parser.parse_args()
 
-    ec2 = boto3.resource('ec2')
+    session = boto3.session.Session(profile_name=options.aws_profile)
+    ec2 = session.resource('ec2')
 
     query_result = {}
     for instance in ec2.instances.all():
@@ -82,12 +89,12 @@ if __name__ == '__main__':
     if overall_result:
         print("OK | {0}".format(perfdata_msg))
         if options.verbose:
-            print(query_result)
+            pprint(query_result)
         sys.exit(0)
     else:
         print("CRITICAL | {0}".format(perfdata_msg))
         if options.verbose:
-            print(query_result)
+            pprint(query_result)
         sys.exit(2)
 
 # vim:ts=4:sw=4:expandtab
