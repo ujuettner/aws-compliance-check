@@ -87,7 +87,7 @@ if __name__ == "__main__":
 
     __session__ = boto3.session.Session(
         profile_name=__options__.aws_profile,
-        region_name="eu-central-1"
+        region_name=__options__.aws_region
     )
     __ec2__ = __session__.resource("ec2")
 
