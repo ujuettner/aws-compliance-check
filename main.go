@@ -2,7 +2,7 @@
 package main
 
 import (
-	"flag"
+	flag "github.com/spf13/pflag"
 	"fmt"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
@@ -18,9 +18,9 @@ var (
 
 // Parse command-line flags and initialize AWS session and EC2 service.
 func init() {
-	region := flag.String("region", "us-east-1", "Use given AWS region. Default: us-east-1")
-	profile := flag.String("profile", "default", "Use given AWS profile. Default: default")
-	verbose = flag.Bool("verbose", false, "Be verbose. Default: false")
+	region := flag.StringP("region", "r", "us-east-1", "Use given AWS region. Default: us-east-1")
+	profile := flag.StringP("profile", "p", "default", "Use given AWS profile. Default: default")
+	verbose = flag.BoolP("verbose", "v", false, "Be verbose. Default: false")
 	flag.Parse()
 
 	session, err := session.NewSession(&aws.Config{
