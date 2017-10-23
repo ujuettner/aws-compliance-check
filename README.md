@@ -13,3 +13,8 @@ go install github.com/ujuettner/aws-compliance-check
 ```
 
 Both rely on a properly set up `~/.aws/credentials` and `~/.aws/config`, respectively.
+
+### TODOs
+
+* Enhance Go variant till feature parity with Python variant.
+* Check Security Groups for dangerous rules.
