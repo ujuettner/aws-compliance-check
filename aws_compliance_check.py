@@ -63,6 +63,7 @@ def check_for_image_up_to_date(instance):
     latest_image_id = _find_latest_image_id_of_kind(filters)
     return instance.image_id == latest_image_id
 
+
 if __name__ == "__main__":
     __parser__ = OptionParser()
     __parser__.add_option("-p", "--profile",
@@ -102,7 +103,7 @@ if __name__ == "__main__":
                     ec2_instance,
                     __options__.check_root_volume
                 )
-            __query_result__[ec2_instance.id]["all_checked_volumes_encrypted?"] = \
+            __query_result__[ec2_instance.id]["all_volumes_encrypted?"] = \
                 volumes_encrypted
             __query_result__[ec2_instance.id]["volumes_checked"] = \
                 volumes_checked
