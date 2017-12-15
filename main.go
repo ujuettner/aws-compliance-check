@@ -2,13 +2,14 @@
 package main
 
 import (
-	flag "github.com/spf13/pflag"
 	"fmt"
+	"os"
+
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/ec2"
-	"os"
+	flag "github.com/spf13/pflag"
 )
 
 var (
@@ -36,21 +37,21 @@ func init() {
 }
 
 // Check, whether a Name tag is set with a meaningful value for the given EC2 instance.
-func name_tag_set(instance ec2.Instance) bool {
-	name_tag_set := false
+func nameTagSet(instance ec2.Instance) bool {
+	nameTagSet := false
 
 	for _, tag := range instance.Tags {
 		if *tag.Key == "Name" && tag.Value != nil && *tag.Value != "" {
-			name_tag_set = true
+			nameTagSet = true
 		}
 	}
 
-	return name_tag_set
+	return nameTagSet
 }
 
 // Check, whether all attached volumes are encrypted for the given EC2 instance.
 // If checkRootVolume is set to false, unencrypted root volumes are considered as ok.
-func all_volumes_encrypted(instance ec2.Instance, checkRootVolume bool) bool {
+func allVolumesEncrypted(instance ec2.Instance, checkRootVolume bool) bool {
 	describeVolumesInput := &ec2.DescribeVolumesInput{
 		Filters: []*ec2.Filter{
 			{
@@ -78,16 +79,14 @@ func all_volumes_encrypted(instance ec2.Instance, checkRootVolume bool) bool {
 	if len(volumes.Volumes) > 0 {
 		if checkRootVolume {
 			return false
-		} else {
-			if len(volumes.Volumes) == 1 && *volumes.Volumes[0].VolumeId == *instance.BlockDeviceMappings[0].Ebs.VolumeId {
-				return true
-			} else {
-				return false
-			}
 		}
-	} else {
-		return true
+		if len(volumes.Volumes) == 1 && *volumes.Volumes[0].VolumeId == *instance.BlockDeviceMappings[0].Ebs.VolumeId {
+			return true
+		}
+		return false
 	}
+
+	return true
 }
 
 func main() {
@@ -102,7 +101,7 @@ func main() {
 	}
 	for _, reservation := range result.Reservations {
 		for _, instance := range reservation.Instances {
-			fmt.Println(*instance.InstanceId, name_tag_set(*instance), all_volumes_encrypted(*instance, true), all_volumes_encrypted(*instance, false))
+			fmt.Println(*instance.InstanceId, nameTagSet(*instance), allVolumesEncrypted(*instance, true), allVolumesEncrypted(*instance, false))
 		}
 	}
 
